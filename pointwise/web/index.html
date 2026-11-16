@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pointwise · 计费方案分析</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="brand">pointwise <span>计费方案分析</span></div>
+  <div class="meta-bar" id="metaBar">加载中…</div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="compare" class="active">方案对比</button>
+  <button data-tab="bills">账单重放与下钻</button>
+  <button data-tab="late">补计用量</button>
+  <button data-tab="versions">版本与确认</button>
+</nav>
+
+<main>
+  <!-- ============ 方案对比 ============ -->
+  <section id="tab-compare" class="tab active">
+    <div class="panel">
+      <h2>运行试算 <span class="tag">从原始用量重放，不用汇总账单套价</span></h2>
+      <div class="form-row">
+        <label>候选方案 <select id="cmpPb"></select></label>
+        <label>迁移策略
+          <select id="cmpPolicy">
+            <option value="unified">统一迁移（全部切到候选方案）</option>
+            <option value="grandfather">保留老客原约定（cutoff 前签约不变）</option>
+          </select>
+        </label>
+        <label>老客分界 cutoff <input type="date" id="cmpCutoff" value="2026-12-01"></label>
+      </div>
+      <details class="assume-box">
+        <summary>行为假设（默认关闭；仅为敏感性测算，<b>不是</b>对客户行为的断言）</summary>
+        <div class="form-row">
+          <label><input type="checkbox" id="asmChurn"> 涨价流失假设：涨幅超
+            <input type="number" id="asmChurnTh" value="15" style="width:4em">% 的客户以
+            <input type="number" id="asmChurnRate" value="30" style="width:4em">% 概率流失</label>
+        </div>
+        <div class="form-row">
+          <label><input type="checkbox" id="asmGrowth"> 用量增长假设：用量整体变化
+            <input type="number" id="asmGrowthPct" value="10" style="width:4em">%</label>
+        </div>
+      </details>
+      <button class="primary" id="btnRun">运行试算</button>
+      <span class="hint" id="runHint"></span>
+    </div>
+    <div id="cmpResult"></div>
+  </section>
+
+  <!-- ============ 账单重放 ============ -->
+  <section id="tab-bills" class="tab">
+    <div class="panel">
+      <h2>账单重放 <span class="tag">任意价目表 × 任意账期，从原始事件重算</span></h2>
+      <div class="form-row">
+        <label>订阅 <select id="billSub"></select></label>
+        <label>账期 <select id="billPeriod"></select></label>
+        <label>价目表 <select id="billPb"></select></label>
+        <label><input type="checkbox" id="billDiffMode"> 对比两版价目</label>
+        <label class="diff-only" hidden>对比 <select id="billPb2"></select></label>
+        <button class="primary" id="btnBill">重放</button>
+      </div>
+    </div>
+    <div id="billResult"></div>
+  </section>
+
+  <!-- ============ 补计用量 ============ -->
+  <section id="tab-late" class="tab">
+    <div class="panel">
+      <h2>补计用量 <span class="tag">迟到事件与账期调整；退款不重复抵扣</span></h2>
+      <div id="lateSummary"></div>
+      <div id="lateImpacted"></div>
+    </div>
+    <div class="panel">
+      <h3>注入一笔迟到用量（演示数据版本变化）</h3>
+      <p class="warn">注入会改变数据版本：此前所有试算的确认都会被版本检查拒绝，需重新试算。</p>
+      <div class="form-row">
+        <label>订阅 <select id="injSub"></select></label>
+        <label>指标
+          <select id="injMetric">
+            <option value="api_calls">API 调用（次）</option>
+            <option value="egress_gb">出站流量（GB）</option>
+            <option value="storage_gb_day">存储（GB·日）</option>
+          </select></label>
+        <label>数量 <input type="number" id="injQty" value="500000"></label>
+        <label>发生日期 <input type="date" id="injDate" value="2026-10-15"></label>
+        <button id="btnInject">注入</button>
+      </div>
+      <div id="injResult"></div>
+    </div>
+    <div id="adjResult"></div>
+  </section>
+
+  <!-- ============ 版本与确认 ============ -->
+  <section id="tab-versions" class="tab">
+    <div class="panel">
+      <h2>试算记录（情景结果） <span class="tag">每次试算绑定数据/价目/配置版本</span></h2>
+      <div id="scenarioList"></div>
+    </div>
+    <div class="panel">
+      <h2>正式决定（正式记录） <span class="tag tag-formal">与情景结果分开存储</span></h2>
+      <div id="decisionList"></div>
+    </div>
+  </section>
+</main>
+
+<footer>pointwise 演示环境 · 全部数据为虚构 · 不连接真实支付</footer>
+<script src="/app.js"></script>
+</body>
+</html>
